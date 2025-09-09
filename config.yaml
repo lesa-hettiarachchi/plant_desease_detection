@@ -1,0 +1,55 @@
+api:
+  allowed_extensions:
+  - .jpg
+  - .jpeg
+  - .png
+  - .bmp
+  - .gif
+  device: cpu
+  host: 0.0.0.0
+  max_file_size: 10485760
+  model_path: best_model.pth
+  port: 8000
+data:
+  batch_size: 32
+  class_names: null
+  data_dir: /Users/lesa/Documents/plant_diseaase_detection/data/raw/plantdisease/PlantVillage
+  img_size: 224
+  num_workers: 4
+  random_seed: 42
+  test_split: 0.15
+  train_split: 0.7
+  val_split: 0.15
+evaluation:
+  generate_plots: true
+  include_heatmap: true
+  output_dir: evaluation_results
+  save_predictions: true
+  test_batch_size: 32
+model:
+  dropout_rate: 0.5
+  freeze_backbone: false
+  input_size:
+  - 3
+  - 224
+  - 224
+  model_type: resnet50
+  num_classes: 15
+  pretrained: true
+monitoring:
+  enable_profiling: false
+  log_file: plant_disease.log
+  log_level: INFO
+  metrics_file: metrics.json
+  profile_output: profile.prof
+training:
+  checkpoint_path: best_model.pth
+  early_stopping_patience: 10
+  experiment_name: plant_disease_detection
+  final_model_path: final_model.pth
+  learning_rate: 0.001
+  num_epochs: 50
+  scheduler_type: reduce_on_plateau
+  use_mlflow: false
+  use_wandb: false
+  weight_decay: 0.0001

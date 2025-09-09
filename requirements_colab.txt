@@ -1,0 +1,41 @@
+# Google Colab Requirements for Plant Disease Detection
+# Install with: pip install -r requirements_colab.txt
+
+# Core PyTorch (CUDA 11.8 for Colab)
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Computer Vision
+opencv-python>=4.6.0
+Pillow>=9.0.0
+scikit-image>=0.19.0
+
+# Data Science
+numpy>=1.21.0
+pandas>=1.4.0
+scikit-learn>=1.1.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# Deep Learning
+albumentations>=1.2.0
+timm>=0.6.0
+efficientnet-pytorch>=0.7.1
+
+# Model Explainability
+grad-cam>=1.4.0
+
+# API (optional for Colab)
+fastapi>=0.78.0
+uvicorn>=0.18.0
+python-multipart>=0.0.5
+
+# Experiment Tracking (optional)
+mlflow>=1.28.0
+wandb>=0.12.0
+
+# Utilities
+tqdm>=4.64.0
+PyYAML>=6.0
+requests>=2.28.0

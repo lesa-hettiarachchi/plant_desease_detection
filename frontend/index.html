@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: #e3f2fd;
+        }
+
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background: #e8f5e8;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .prediction {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .prediction-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .confidence-bar {
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .confidence-text {
+            font-size: 1.1em;
+            color: #2c3e50;
+            margin-top: 5px;
+        }
+
+        .all-predictions {
+            margin-top: 20px;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .prediction-item.top {
+            border-left-color: #27ae60;
+            font-weight: bold;
+        }
+
+        .prediction-class {
+            color: #2c3e50;
+        }
+
+        .prediction-prob {
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .info-section {
+            background: #e8f4fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .info-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .info-section ul {
+            color: #7f8c8d;
+            padding-left: 20px;
+        }
+
+        .info-section li {
+            margin: 5px 0;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .upload-area {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 Plant Disease Detection</h1>
+            <p>Upload an image of a plant leaf to detect potential diseases</p>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Click to upload or drag and drop</div>
+            <div class="upload-subtext">Supports JPG, PNG, and other image formats</div>
+            <input type="file" id="fileInput" class="file-input" accept="image/*">
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing image...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="result-container" id="resultContainer">
+            <div id="imagePreview"></div>
+            <div id="predictionResult"></div>
+        </div>
+
+        <div class="info-section">
+            <h3>Supported Plant Diseases</h3>
+            <ul>
+                <li><strong>Tomato:</strong> Bacterial Spot, Early Blight, Late Blight, Leaf Mold, Septoria Leaf Spot, Spider Mites, Target Spot, Yellow Leaf Curl Virus, Mosaic Virus, Healthy</li>
+                <li><strong>Potato:</strong> Early Blight, Late Blight, Healthy</li>
+                <li><strong>Pepper:</strong> Bacterial Spot, Healthy</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Powered by Deep Learning • FastAPI • PyTorch</p>
+        </div>
+    </div>
+
+    <script>
+        class PlantDiseaseDetector {
+            constructor() {
+                this.apiUrl = 'http://localhost:8000';
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+
+                // Click to upload
+                uploadArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                // File input change
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleFile(e.target.files[0]);
+                    }
+                });
+
+                // Drag and drop
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    
+                    if (e.dataTransfer.files.length > 0) {
+                        this.handleFile(e.dataTransfer.files[0]);
+                    }
+                });
+            }
+
+            async handleFile(file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    this.showError('Please select a valid image file.');
+                    return;
+                }
+
+                // Validate file size (max 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    this.showError('File size too large. Please select an image smaller than 10MB.');
+                    return;
+                }
+
+                this.showLoading();
+                this.hideError();
+                this.hideResult();
+
+                try {
+                    // Convert to base64
+                    const base64 = await this.fileToBase64(file);
+                    
+                    // Make prediction
+                    const result = await this.predictDisease(base64);
+                    
+                    // Display results
+                    this.displayResult(file, result);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showError('Failed to analyze image. Please try again.');
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            async predictDisease(imageBase64) {
+                const response = await fetch(`${this.apiUrl}/predict/base64`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image_base64: imageBase64,
+                        return_heatmap: false
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Prediction failed');
+                }
+
+                return await response.json();
+            }
+
+            displayResult(file, result) {
+                // Show image preview
+                const imagePreview = document.getElementById('imagePreview');
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.className = 'image-preview';
+                imagePreview.innerHTML = '';
+                imagePreview.appendChild(img);
+
+                // Show prediction result
+                const predictionResult = document.getElementById('predictionResult');
+                predictionResult.innerHTML = this.createResultHTML(result);
+
+                // Show result container
+                this.showResult();
+            }
+
+            createResultHTML(result) {
+                const confidence = Math.round(result.confidence * 100);
+                const predictedClass = result.predicted_class.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                let html = `
+                    <div class="prediction">
+                        <div class="prediction-title">Predicted Disease: ${predictedClass}</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${confidence}%"></div>
+                        </div>
+                        <div class="confidence-text">Confidence: ${confidence}%</div>
+                        <div class="confidence-text">Processing Time: ${result.processing_time.toFixed(2)}s</div>
+                    </div>
+                `;
+
+                if (result.all_predictions && result.all_predictions.length > 0) {
+                    html += '<div class="all-predictions"><h3>All Predictions:</h3>';
+                    
+                    result.all_predictions.forEach((pred, index) => {
+                        const className = pred.class.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        const probability = Math.round(pred.probability * 100);
+                        const itemClass = index === 0 ? 'prediction-item top' : 'prediction-item';
+                        
+                        html += `
+                            <div class="${itemClass}">
+                                <span class="prediction-class">${className}</span>
+                                <span class="prediction-prob">${probability}%</span>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                }
+
+                if (result.image_quality) {
+                    html += `
+                        <div class="info-section">
+                            <h3>Image Quality</h3>
+                            <p>Quality Score: ${result.image_quality.quality_score}/100</p>
+                            <p>Brightness: ${Math.round(result.image_quality.brightness)}</p>
+                            <p>Contrast: ${Math.round(result.image_quality.contrast)}</p>
+                        </div>
+                    `;
+                }
+
+                return html;
+            }
+
+            showLoading() {
+                document.getElementById('loading').classList.add('show');
+            }
+
+            hideLoading() {
+                document.getElementById('loading').classList.remove('show');
+            }
+
+            showError(message) {
+                const errorDiv = document.getElementById('error');
+                errorDiv.textContent = message;
+                errorDiv.classList.add('show');
+            }
+
+            hideError() {
+                document.getElementById('error').classList.remove('show');
+            }
+
+            showResult() {
+                document.getElementById('resultContainer').classList.add('show');
+            }
+
+            hideResult() {
+                document.getElementById('resultContainer').classList.remove('show');
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new PlantDiseaseDetector();
+        });
+    </script>
+</body>
+</html>
